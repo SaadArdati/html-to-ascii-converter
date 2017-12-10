@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/html to ascii converter.iml" filepath="$PROJECT_DIR$/html to ascii converter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/html to ascii converter.iml" filepath="$PROJECT_DIR$/.idea/html to ascii converter.iml" />
     </modules>
   </component>
 </project>
