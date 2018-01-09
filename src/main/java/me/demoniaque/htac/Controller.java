@@ -16,7 +16,7 @@ import javafx.stage.FileChooser;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -144,7 +144,13 @@ public class Controller {
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
 				String json = gson.toJson(object);
 
-				Files.write(Paths.get(file.getPath()), Collections.singleton(json), StandardCharsets.UTF_8);
+				for (Charset charset : Charset.availableCharsets().values()) {
+					try {
+						Files.write(Paths.get(file.getPath()), Collections.singleton(json), charset);
+						return;
+					} catch (IOException ignored) {
+					}
+				}
 
 				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new FileTransferable(file), (clipboard, contents) -> System.out.println("Lost ownership"));
 
@@ -164,18 +170,19 @@ public class Controller {
 				.replace("‘", "'")
 				.replace("’", "'")
 				.replace("‚", ",")
-				.replace("“", "\"")
-				.replace("”", "\"")
+				.replace("“", "\\\"")
+				.replace("”", "\\\"")
 				.replace("‛", "'")
-				.replace("‟", "\"")
-				.replace("〝", "\"")
-				.replace("〞", "\"")
-				.replace("＂", "\"")
+				.replace("‟", "\\\"")
+				.replace("〝", "\\\"")
+				.replace("〞", "\\\"")
+				.replace("＂", "\\\"")
 				.replace("’", "'")
 				.replace(",", ",")
-				.replace("”", "\"")
-				.replace("“", "\"")
-				.replace("-", "-");
+				.replace("”", "\\\"")
+				.replace("“", "\\\"")
+				.replace("-", "-")
+				.replace("`", "'");
 
 		StringBuilder word = new StringBuilder();
 		String newText = string;
@@ -201,16 +208,21 @@ public class Controller {
 
 	public void convertFiles(Collection<File> files) {
 		for (File file : files) {
-			try {
-				List<String> fileContent = new ArrayList<>(Files.readAllLines(Paths.get(file.getPath()), StandardCharsets.UTF_8));
 
-				for (int i = 0; i < fileContent.size(); i++) {
-					fileContent.set(i, convertString(fileContent.get(i)));
+			for (Charset charset : Charset.availableCharsets().values()) {
+				try {
+					List<String> fileContent = Files.readAllLines(Paths.get(file.getPath()), charset);
+
+					if (fileContent.isEmpty()) return;
+
+					for (int i = 0; i < fileContent.size(); i++) {
+						fileContent.set(i, convertString(fileContent.get(i)));
+					}
+
+					Files.write(Paths.get(file.getPath()), fileContent, charset);
+					return;
+				} catch (IOException ignored) {
 				}
-
-				Files.write(Paths.get(file.getPath()), fileContent, StandardCharsets.UTF_8);
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 	}
