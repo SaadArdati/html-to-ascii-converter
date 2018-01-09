@@ -17,6 +17,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -147,6 +148,16 @@ public class Controller {
 				for (Charset charset : Charset.availableCharsets().values()) {
 					try {
 						Files.write(Paths.get(file.getPath()), Collections.singleton(json), charset);
+
+						List<String> fileContent = Files.readAllLines(Paths.get(file.getPath()), charset);
+
+						if (fileContent.isEmpty()) return;
+
+						for (int i = 0; i < fileContent.size(); i++) {
+							fileContent.set(i, convertString(fileContent.get(i)));
+						}
+
+						Files.write(Paths.get(file.getPath()), fileContent, StandardCharsets.UTF_8);
 						return;
 					} catch (IOException ignored) {
 					}
@@ -220,6 +231,16 @@ public class Controller {
 					}
 
 					Files.write(Paths.get(file.getPath()), fileContent, charset);
+
+					fileContent = Files.readAllLines(Paths.get(file.getPath()), charset);
+
+					if (fileContent.isEmpty()) return;
+
+					for (int i = 0; i < fileContent.size(); i++) {
+						fileContent.set(i, convertString(fileContent.get(i)));
+					}
+
+					Files.write(Paths.get(file.getPath()), fileContent, StandardCharsets.UTF_8);
 					return;
 				} catch (IOException ignored) {
 				}
